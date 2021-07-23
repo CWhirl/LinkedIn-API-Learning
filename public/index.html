@@ -21,8 +21,84 @@
       <a class="btn btn-primary btn-lg mt-4" href="/notes" role="button">Get Started</a>
     </div>
   </div>
-<!-- The core Firebase JS SDK is always required and must be listed first -->
-  <script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-app.js"></script>
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-app.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-analytics.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-firestore.js"></script>
+
+<script>
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  var firebaseConfig = {
+    apiKey: "AIzaSyDCB3ihfMJNCTgJmckzug6TxAKQyvs5Wwg",
+    authDomain: "project-3-930bb.firebaseapp.com",
+    projectId: "project-3-930bb",
+    storageBucket: "project-3-930bb.appspot.com",
+    messagingSenderId: "63137074",
+    appId: "1:63137074:web:ec542e7067cbc1cfbaa32b",
+    measurementId: "G-XW8KQ6T9V2"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+  var db = firebase.firestore();
+  var userRef = db.collection("users");
+  const user = firebase.auth().currentUser;
+
+// used to update the cloud db with the access token and matching user id 
+function updateDB(accessToken, uid) {
+  userRef.doc(uid).set({
+    token: accessToken
+})
+.then(() => {
+    console.log(`Document written with ID: , ${uid}`);
+})
+.catch((error) => {
+    console.error("Error adding document: ", error);
+});
+}
+
+function getUserInfo(token) {
+  // get the user info the the github graphql api
+  var url = "https://api.github.com/graphql";
+  var headers = {
+    "Authorization": "Bearer " + token
+  };
+  var options = {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify({
+      query: "query { viewer { name email location login url websiteUrl bio avatarUrl} }"
+    })
+  };
+  return fetch(url, options).then(function(response) {
+    return response.json();
+});
+}
+
+// Used to prompt the user to login with their github account
+function promptLogin() {
+  firebase.auth().signInWithPopup(provider).then(function(result) {
+    // This gives you a GitHub Access Token. You can use it to access the GitHub API.
+    const token = result.credential.accessToken;
+    const user = firebase.auth().currentUser;
+    updateDB(token, user.uid);
+    console.log(getUserInfo(token));
+  });
+}
+
+var provider = new firebase.auth.GithubAuthProvider();
+
+if (!user) {
+    promptLogin();
+}
+
+
+</script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
   <script src="/assets/js/index.js"></script>
 </body>

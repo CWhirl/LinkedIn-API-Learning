@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const api = require("./routes/api-routes")
 const html = require("./routes/html-routes")
+const path = require('path');
 
 const PORT = process.env.PORT || 4567;
 
@@ -14,7 +15,7 @@ require("firebase/firestore");
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 var firebaseConfig = {
-  apiKey: process.env.FIREBASE_KEY,
+  apiKey: "AIzaSyDCB3ihfMJNCTgJmckzug6TxAKQyvs5Wwg",
   authDomain: "project-3-930bb.firebaseapp.com",
   projectId: "project-3-930bb",
   storageBucket: "project-3-930bb.appspot.com",
@@ -26,9 +27,9 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 //configures express settings
-app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 //adds the routes to the express app
 app.use(api);
